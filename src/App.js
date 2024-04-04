@@ -1,27 +1,46 @@
-import React from "react"
-import QRReader from "react-qr-reader"
+import React from 'react';
+import { Slide } from '@mui/material';
+import { SnackbarProvider } from 'notistack';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
+import SignIn from './signIn';
+import ProtectedRoute from './protectedRoute';
+
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false, // Disable refetch when window regains focus
+      keepPreviousData: true,
+      retry: false,
+    },
+  },
+});
 function App() {
-  const handleScan = (data) => {
-    if (data) {
-      console.log("Result: ", data)
-    }
-  }
-
-  const handleError = (err) => {
-    console.error(err)
-  }
 
   return (
-    <div>
-      <QRReader
-        delay={300}
-        onError={handleError}
-        onScan={handleScan}
-        style={{ width: "100%" }}
-      />
-    </div>
-  )
+    <QueryClientProvider client={queryClient}>
+      <SnackbarProvider
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+        TransitionComponent={Slide}
+      >
+        <Router>
+          <Routes>
+            <Route path="/login" element={<SignIn />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute />
+              }
+            />
+          </Routes>
+        </Router>
+      </SnackbarProvider>
+    </QueryClientProvider>
+  );
 }
 
-export default App
+export default App;
